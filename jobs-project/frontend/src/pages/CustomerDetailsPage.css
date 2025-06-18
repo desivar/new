@@ -1,0 +1,121 @@
+/* src/pages/CustomerDetailsPage.css */
+.customer-details-container {
+  padding: 20px;
+  max-width: 960px;
+  margin: 0 auto;
+  font-family: Arial, sans-serif;
+}
+
+.customer-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 15px;
+}
+
+.customer-header h2 {
+  margin: 0;
+  color: #333;
+}
+
+.customer-content-area {
+  display: flex;
+  gap: 20px;
+}
+
+.customer-sidebar {
+  flex: 1; /* Takes up 1 part of available space */
+  min-width: 280px; /* Minimum width for sidebar */
+  background-color: #f9f9f9;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+}
+
+.customer-sidebar h3 {
+  margin-top: 0;
+  color: #555;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 10px;
+  margin-bottom: 15px;
+}
+
+.customer-sidebar label {
+  display: block;
+  margin-top: 10px;
+  margin-bottom: 5px;
+  font-weight: bold;
+  color: #444;
+}
+
+.customer-sidebar input[type="text"],
+.customer-sidebar input[type="email"],
+.customer-sidebar input[type="number"],
+.customer-sidebar textarea {
+  width: calc(100% - 20px); /* Adjust for padding */
+  padding: 10px;
+  margin-bottom: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 1em;
+}
+
+.customer-main-area {
+  flex: 2; /* Takes up 2 parts of available space */
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+}
+
+.customer-main-area .tabs {
+  display: flex;
+  border-bottom: 1px solid #ddd;
+  margin-bottom: 20px;
+}
+
+.customer-main-area .tab-button {
+  padding: 10px 15px;
+  border: none;
+  background-color: transparent;
+  cursor: pointer;
+  font-size: 1.1em;
+  color: #666;
+  border-bottom: 2px solid transparent;
+  transition: all 0.3s ease;
+}
+
+.customer-main-area .tab-button.active {
+  color: #007bff;
+  border-bottom-color: #007bff;
+  font-weight: bold;
+}
+
+.customer-main-area .tab-content {
+  padding: 10px 0;
+}
+
+/* Basic styling for buttons */
+button {
+  padding: 8px 15px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  background-color: #007bff;
+  color: white;
+  transition: background-color 0.2s ease;
+}
+
+button:hover {
+  background-color: #0056b3;
+}
+
+button[onClick*="Delete"] {
+  background-color: #dc3545;
+}
+
+button[onClick*="Delete"]:hover {
+  background-color: #c82333;
+}
