@@ -1,7 +1,6 @@
 const express = require("express");
 const router = express.Router();
 const jobsController = require("../controllers/jobs"); // Corrected variable name and matches the import
-const { protect } = require("../middleware/authMiddleware"); // If jobs routes are protected
 
 // Apply protection middleware to all job routes if needed
 // router.use(protect); // Uncomment this line if all jobs routes require authentication

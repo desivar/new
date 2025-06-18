@@ -3,7 +3,6 @@ const express = require("express");
 const router = express.Router();
 // Ensure userController is correctly imported, including loginUser
 const userController = require("../controllers/user");
-const { protect } = require("../middleware/authMiddleware");
 
 // Public routes
 router.post("/", userController.createUser); // Register a new user
