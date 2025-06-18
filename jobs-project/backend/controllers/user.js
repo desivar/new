@@ -2,7 +2,7 @@
 
 const User = require('../db/User'); // THIS IS THE CORRECTED LINE
 const bcrypt = require('bcryptjs'); // Needed for password hashing (e.g., in createUser)
-const jwt = require('jsonwebtoken'); // Needed for token generation/verification if login is in this controller
+
 
 
 // --- Helper function for JWT token generation (if you handle login here) ---
