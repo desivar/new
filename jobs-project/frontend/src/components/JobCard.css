@@ -1,0 +1,51 @@
+/* src/components/JobCard.css */
+.job-card {
+  background-color: white;
+  padding: 15px;
+  border-radius: 6px;
+  box-shadow: 0 1px 0 rgba(9,30,66,.25); /* Subtle shadow */
+  cursor: grab; /* Indicates it's draggable */
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  transition: background-color 0.2s ease; /* Smooth hover effect */
+}
+
+.job-card:hover {
+    background-color: #f9f9f9; /* Slightly lighter on hover */
+}
+
+.job-card:active {
+    cursor: grabbing; /* Changes cursor when being dragged */
+}
+
+.card-content {
+  /* Flex grow to push icons to bottom if content expands */
+  flex-grow: 1;
+}
+
+.card-title {
+  margin: 0;
+  font-size: 1em;
+  color: #333;
+  font-weight: 500;
+  margin-bottom: 5px;
+}
+
+.card-value {
+  font-size: 0.9em;
+  color: #555;
+  font-weight: bold;
+}
+
+.card-icons {
+  display: flex;
+  justify-content: flex-end; /* Align icons to the right */
+  gap: 8px; /* Space between icons */
+  margin-top: 10px; /* Space from content above */
+}
+
+.icon {
+  font-size: 1.1em;
+  color: #777;
+}
