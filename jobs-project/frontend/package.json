@@ -9,6 +9,7 @@
     "react-dom": "^19.1.0",
     "react-router-dom": "^7.6.2",
     "react-scripts": "^5.0.1",
-    "vite": "^6.3.5"
+    "vite": "^6.3.5",
+    "web-vitals": "^5.0.3"
   }
 }
