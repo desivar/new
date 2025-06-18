@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 
 const App = () => {
   const [activeSection, setActiveSection] = useState('dashboard');
-  const [backendUrl, setBackendUrl] = useState('http://localhost:3000');
+  const [backendUrl, setBackendUrl] = useState('http://localhost:5500');
   const [collections, setCollections] = useState({
     users: { data: null, loaded: false, loading: false },
     customers: { data: null, loaded: false, loading: false },
