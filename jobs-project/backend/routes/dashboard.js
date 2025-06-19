@@ -1,35 +1,32 @@
-const express = require('express');
+// routes/dashboard.js
+const express = require("express");
 const router = express.Router();
-const Job = require('../models/Job'); // Adjust path to your Job model
-const Customer = require('../models/Customer'); // Adjust path to your Customer model
+
+// Import your existing controllers - adjust paths as needed
+const jobsController = require("../controllers/jobs");
+const customersController = require("../controllers/customers"); // if you have this
+
+// You'll need to create dashboard-specific controller functions
+// For now, let's create simple routes that use mock data
 
 // GET /api/dashboard/metrics
 router.get('/metrics', async (req, res) => {
   try {
-    const totalJobs = await Job.countDocuments();
-    const activeJobs = await Job.countDocuments({ 
-      status: { $in: ['In Progress', 'Planning', 'Active'] } 
-    });
-    const completedJobs = await Job.countDocuments({ status: 'Completed' });
+    // Replace this with actual database queries using your models
+    // You'll need to adapt this based on your database connection method
     
-    const totalRevenueResult = await Job.aggregate([
-      { $match: { status: 'Completed' } },
-      { $group: { _id: null, total: { $sum: '$value' } } }
-    ]);
+    // Mock data for now - replace with real queries
+    const dashboardData = {
+      totalJobs: 47,
+      activeJobs: 23,
+      completedJobs: 18,
+      totalRevenue: 125000,
+      pipelineValue: 89000
+    };
     
-    const pipelineValueResult = await Job.aggregate([
-      { $match: { status: { $ne: 'Completed' } } },
-      { $group: { _id: null, total: { $sum: '$value' } } }
-    ]);
-    
-    res.json({
-      totalJobs,
-      activeJobs,
-      completedJobs,
-      totalRevenue: totalRevenueResult[0]?.total || 0,
-      pipelineValue: pipelineValueResult[0]?.total || 0
-    });
+    res.json(dashboardData);
   } catch (error) {
+    console.error('Dashboard metrics error:', error);
     res.status(500).json({ error: error.message });
   }
 });
@@ -37,36 +34,19 @@ router.get('/metrics', async (req, res) => {
 // GET /api/dashboard/revenue
 router.get('/revenue', async (req, res) => {
   try {
-    const sixMonthsAgo = new Date();
-    sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+    // Mock revenue data - replace with real database queries
+    const monthlyData = [
+      { month: 'Jan', revenue: 15000 },
+      { month: 'Feb', revenue: 18000 },
+      { month: 'Mar', revenue: 22000 },
+      { month: 'Apr', revenue: 25000 },
+      { month: 'May', revenue: 28000 },
+      { month: 'Jun', revenue: 17000 }
+    ];
     
-    const monthlyData = await Job.aggregate([
-      { 
-        $match: { 
-          status: 'Completed',
-          completedAt: { $gte: sixMonthsAgo }
-        } 
-      },
-      {
-        $group: {
-          _id: { 
-            year: { $year: '$completedAt' },
-            month: { $month: '$completedAt' }
-          },
-          revenue: { $sum: '$value' }
-        }
-      },
-      { $sort: { '_id.year': 1, '_id.month': 1 } }
-    ]);
-    
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    const formatted = monthlyData.map(item => ({
-      month: months[item._id.month - 1],
-      revenue: item.revenue
-    }));
-    
-    res.json({ monthlyData: formatted });
+    res.json({ monthlyData });
   } catch (error) {
+    console.error('Dashboard revenue error:', error);
     res.status(500).json({ error: error.message });
   }
 });

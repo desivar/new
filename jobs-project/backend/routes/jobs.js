@@ -1,20 +1,16 @@
-const express = require('express');
+//Imports
+const express = require("express");
 const router = express.Router();
-const Job = require('../models/Job');
+const pipecont = require("../controllers/jobs");
 
-// GET /api/jobs
-router.get('/', async (req, res) => {
-  try {
-    const { limit = 10, sort = '-createdAt' } = req.query;
-    const jobs = await Job.find()
-      .populate('customer', 'name')
-      .sort(sort)
-      .limit(parseInt(limit));
-    
-    res.json({ jobs });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
+//GET all jobs (this is what the dashboard needs)
+router.get("/", pipecont.getAllJobs);
+
+//GET a single job by ID
+router.get("/:id", pipecont.getJobById);
+
+router.post("/", pipecont.createJob);
+router.put("/:id", pipecont.updateJob);
+router.delete("/:id", pipecont.deleteJob);
 
 module.exports = router;
