@@ -11,7 +11,12 @@ const jobSchema = {
 
 // Customer Schema  
 const customerSchema = {
-  name: String,
+  
+  firstName: String,
+  lastName: String,
   email: String,
-  // other fields...
+  phone: String,
+  address: String,
+  notes: String
+
 };
