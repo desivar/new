@@ -17,42 +17,163 @@ import {
 } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, BarChart, Bar } from 'recharts';
 
+// API functions - create these in your api folder
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+
+const apiCall = async (endpoint, options = {}) => {
+  const token = localStorage.getItem('token');
+  const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': token ? `Bearer ${token}` : '',
+      ...options.headers,
+    },
+    ...options,
+  });
+  
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`);
+  }
+  
+  return response.json();
+};
+
 function DashboardPage() {
-  // Mock data - replace with actual API calls
   const [dashboardData, setDashboardData] = useState({
     metrics: {
-      totalJobs: 47,
-      activeJobs: 23,
-      completedJobs: 18,
-      totalRevenue: 125000,
-      totalCustomers: 34,
-      pipelineValue: 89000
+      totalJobs: 0,
+      activeJobs: 0,
+      completedJobs: 0,
+      totalRevenue: 0,
+      totalCustomers: 0,
+      pipelineValue: 0
     },
-    recentJobs: [
-      { id: 1, title: 'Website Redesign', customer: 'Tech Corp', status: 'In Progress', value: 5000, dueDate: '2025-06-15' },
-      { id: 2, title: 'Mobile App Development', customer: 'StartupXYZ', status: 'Planning', value: 15000, dueDate: '2025-07-01' },
-      { id: 3, title: 'SEO Optimization', customer: 'Local Business', status: 'Completed', value: 2500, dueDate: '2025-06-10' },
-      { id: 4, title: 'Database Migration', customer: 'Enterprise Inc', status: 'In Progress', value: 8000, dueDate: '2025-06-20' }
-    ],
-    monthlyRevenue: [
-      { month: 'Jan', revenue: 15000 },
-      { month: 'Feb', revenue: 18000 },
-      { month: 'Mar', revenue: 22000 },
-      { month: 'Apr', revenue: 25000 },
-      { month: 'May', revenue: 28000 },
-      { month: 'Jun', revenue: 17000 }
-    ],
-    jobsByStatus: [
-      { name: 'In Progress', value: 23, color: '#3b82f6' },
-      { name: 'Completed', value: 18, color: '#10b981' },
-      { name: 'Planning', value: 6, color: '#f59e0b' }
-    ],
-    upcomingDeadlines: [
-      { job: 'Website Redesign', customer: 'Tech Corp', dueDate: '2025-06-15', daysLeft: 6 },
-      { job: 'Database Migration', customer: 'Enterprise Inc', dueDate: '2025-06-20', daysLeft: 11 },
-      { job: 'Mobile App Development', customer: 'StartupXYZ', dueDate: '2025-07-01', daysLeft: 22 }
-    ]
+    recentJobs: [],
+    monthlyRevenue: [],
+    jobsByStatus: [],
+    upcomingDeadlines: []
   });
+  
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  // Fetch dashboard data from your API
+  const fetchDashboardData = async () => {
+    try {
+      setLoading(true);
+      
+      // Fetch all necessary data - adjust endpoints to match your API
+      const [metricsRes, jobsRes, customersRes, revenueRes] = await Promise.all([
+        apiCall('/dashboard/metrics'),
+        apiCall('/jobs?limit=10&sort=-createdAt'), // Recent jobs
+        apiCall('/customers/count'),
+        apiCall('/dashboard/revenue?period=6months')
+      ]);
+
+      // Process jobs data
+      const jobsByStatus = processJobsByStatus(jobsRes.jobs || jobsRes);
+      const upcomingDeadlines = processUpcomingDeadlines(jobsRes.jobs || jobsRes);
+      
+      setDashboardData({
+        metrics: {
+          totalJobs: metricsRes.totalJobs || 0,
+          activeJobs: metricsRes.activeJobs || 0,
+          completedJobs: metricsRes.completedJobs || 0,
+          totalRevenue: metricsRes.totalRevenue || 0,
+          totalCustomers: customersRes.count || 0,
+          pipelineValue: metricsRes.pipelineValue || 0
+        },
+        recentJobs: (jobsRes.jobs || jobsRes).slice(0, 4),
+        monthlyRevenue: revenueRes.monthlyData || [],
+        jobsByStatus,
+        upcomingDeadlines: upcomingDeadlines.slice(0, 5)
+      });
+      
+    } catch (err) {
+      console.error('Error fetching dashboard data:', err);
+      setError('Failed to load dashboard data');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Helper function to process jobs by status
+  const processJobsByStatus = (jobs) => {
+    const statusCounts = jobs.reduce((acc, job) => {
+      const status = job.status || 'Unknown';
+      acc[status] = (acc[status] || 0) + 1;
+      return acc;
+    }, {});
+
+    const colors = {
+      'In Progress': '#3b82f6',
+      'Completed': '#10b981',
+      'Planning': '#f59e0b',
+      'On Hold': '#ef4444',
+      'Cancelled': '#6b7280'
+    };
+
+    return Object.entries(statusCounts).map(([name, value]) => ({
+      name,
+      value,
+      color: colors[name] || '#6b7280'
+    }));
+  };
+
+  // Helper function to process upcoming deadlines
+  const processUpcomingDeadlines = (jobs) => {
+    const today = new Date();
+    
+    return jobs
+      .filter(job => job.dueDate && job.status !== 'Completed')
+      .map(job => {
+        const dueDate = new Date(job.dueDate);
+        const diffTime = dueDate - today;
+        const daysLeft = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        
+        return {
+          job: job.title || job.name,
+          customer: job.customer?.name || job.customerName || 'Unknown',
+          dueDate: job.dueDate.split('T')[0], // Format date
+          daysLeft
+        };
+      })
+      .filter(deadline => deadline.daysLeft >= 0) // Only future deadlines
+      .sort((a, b) => a.daysLeft - b.daysLeft); // Sort by urgency
+  };
+
+  useEffect(() => {
+    fetchDashboardData();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 pt-16 flex items-center justify-center">
+        <div className="flex items-center space-x-2">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+          <span className="text-gray-600">Loading dashboard...</span>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50 pt-16 flex items-center justify-center">
+        <div className="text-center">
+          <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">Error Loading Dashboard</h3>
+          <p className="text-gray-600 mb-4">{error}</p>
+          <button 
+            onClick={fetchDashboardData}
+            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+          >
+            Try Again
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   const getStatusColor = (status) => {
     switch (status.toLowerCase()) {
@@ -212,14 +333,14 @@ function DashboardPage() {
                 <div key={job.id} className="px-6 py-4 hover:bg-gray-50 transition-colors">
                   <div className="flex items-center justify-between">
                     <div className="flex-1">
-                      <h4 className="text-sm font-semibold text-gray-900">{job.title}</h4>
-                      <p className="text-sm text-gray-600">{job.customer}</p>
+                      <h4 className="text-sm font-semibold text-gray-900">{job.title || job.name}</h4>
+                      <p className="text-sm text-gray-600">{job.customer?.name || job.customerName || 'No customer'}</p>
                       <div className="flex items-center gap-4 mt-2">
                         <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(job.status)}`}>
-                          {job.status}
+                          {job.status || 'Unknown'}
                         </span>
-                        <span className="text-sm text-gray-600">{formatCurrency(job.value)}</span>
-                        <span className="text-sm text-gray-600">Due: {job.dueDate}</span>
+                        <span className="text-sm text-gray-600">{formatCurrency(job.value || job.amount || 0)}</span>
+                        <span className="text-sm text-gray-600">Due: {job.dueDate ? job.dueDate.split('T')[0] : 'No due date'}</span>
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
