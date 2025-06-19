@@ -8,17 +8,13 @@
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    
-  "start": "node index.js"
-
-},
-
-
+    "start": "node index.js"
+  },
   "dependencies": {
+    "lucide-react": "^0.517.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "react-router-dom": "^7.6.2"
-    
   },
   "devDependencies": {
     "@eslint/js": "^9.25.0",
